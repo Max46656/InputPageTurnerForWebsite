@@ -5,10 +5,10 @@
 // @name:en      Keyboard and Mouse Wheel Page Turner
 // @namespace    https://github.com/Max46656
 // @version      1.07
-// @description  自動切換頁面，使用滑鼠滾輪或按鍵觸發翻頁。在Pixiv頁面載入後自動展開所有作品。
-// @description:zh-TW 自動切換頁面，使用滑鼠滾輪或按鍵觸發翻頁。在Pixiv頁面載入後自動展開所有作品。
-// @description:ja スクロールまたはキーでページめくりを自動的に切り替えます。Pixivページの読み込み後、すべての作品を自動的に展開します。
-// @description:en Automatically switch pages using mouse wheel or keyboard triggers. Automatically expands all works after the page is fully loaded on Pixiv pages.
+// @description  使用滑鼠滾輪或按鍵快速切換上下頁。在Pixiv頁面載入後自動展開所有作品。
+// @description:zh-TW 使用滑鼠滾輪或按鍵快速切換上下頁。在Pixiv頁面載入後，自動展開所有作品。
+// @description:ja マウスホイールをスクロールするか、キーを押すことで、簡単にページを上下に切り替えることができます。Pixivのページが完全に読み込まれた後、すべての作品を自動的に展開します。
+// @description:en Quickly navigation between pages by scrolling the mouse wheel or pressing keys. Automatically expands all works after the Pixiv page is fully loaded.
 // @author       Max
 // @match        https://www.pixiv.net/*
 // @match        https://kemono.su/*
@@ -223,9 +223,9 @@ class PageInputNavigation {
             "ja": {
                 "TogglePageMode": "ページ切り替えモードの切り替え",
                 "CustomizeKeys": "キーのカスタマイズ",
-                "EnterNewPrevPageLetter": "前のページを置き換える英字または数字を 1 つ入力してください:",
-                "EnterNewNextPageLetter": "次のページを置き換える英字または数字を 1 つ入力してください:",
-                "CustomKeyError": "カスタムキーエラー：入力が無効です。単一の英文字または数字を入力してください。"
+                "EnterNewPrevPageLetter": "前のページを置き換える英字または數字を 1 つ入力してください:",
+                "EnterNewNextPageLetter": "次のページを置き換える英字または數字を 1 つ入力してください:",
+                "CustomKeyError": "カスタムキーエラー：入力が無効です。単一の英文字または數字を入力してください。"
             }
         };
         //console.log(navigator.language);
