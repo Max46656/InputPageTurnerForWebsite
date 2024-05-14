@@ -4,7 +4,7 @@
 // @name:ja      キーとマウスホイールでのページめくり機
 // @name:en      Keyboard and Mouse Wheel Page Turner
 // @namespace    https://github.com/Max46656
-// @version      1.10
+// @version      1.11
 // @description  使用滑鼠滾輪或按鍵快速切換上下頁。在Pixiv頁面載入後自動展開所有作品。
 // @description:zh-TW 使用滑鼠滾輪或按鍵快速切換上下頁。在Pixiv頁面載入後，自動展開所有作品。
 // @description:ja マウスホイールをスクロールするか、キーを押すことで、簡単にページを上下に切り替えることができます。Pixivのページが完全に読み込まれた後、すべての作品を自動的に展開します。
@@ -183,18 +183,6 @@ class PageButtonsOfDomain{
             "nextButton": ".sc-d98f2c-0.sc-xhhh7v-2.cCkJiq.sc-xhhh7v-1-filterProps-Styled-Component.kKBslM",
             "prevButton": ".sc-d98f2c-0.sc-xhhh7v-2.cCkJiq.sc-xhhh7v-1-filterProps-Styled-Component.kKBslM",
           },
-          "exhentai.org": {
-            "nextButton": "#dnext",
-            "prevButton": "#dprev",
-          },
-          "e-hentai.org": {
-            "nextButton": "#dnext",
-            "prevButton": "#dprev",
-          },
-          "www.asmr.one": {
-            "nextButton": ".ant-pagination-item-link",
-            "prevButton": ".ant-pagination-item-link",
-          },
           "www.goddessfantasy.net": {
             "nextButton": ".navPages",
             "prevButton": ".navPages",
@@ -204,7 +192,7 @@ class PageButtonsOfDomain{
             "prevButton": ".prev",
           },
         })
-      console.log(this.allPageButtons);
+      //console.log(this.allPageButtons);
   }
 
     getAllPageButtons(){
@@ -329,5 +317,5 @@ class PageButtonsOfDomain{
   }
 } */
 
-const transferStudent = new addNewDomainSupper();
+//const transferStudent = new addNewDomainSupper();
 const johnTheAlmondHolder = new PageInputNavigation();
