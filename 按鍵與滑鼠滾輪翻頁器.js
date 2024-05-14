@@ -4,17 +4,13 @@
 // @name:ja      キーとマウスホイールでのページめくり機
 // @name:en      Keyboard and Mouse Wheel Page Turner
 // @namespace    https://github.com/Max46656
-// @version      1.07
+// @version      1.10
 // @description  使用滑鼠滾輪或按鍵快速切換上下頁。在Pixiv頁面載入後自動展開所有作品。
 // @description:zh-TW 使用滑鼠滾輪或按鍵快速切換上下頁。在Pixiv頁面載入後，自動展開所有作品。
 // @description:ja マウスホイールをスクロールするか、キーを押すことで、簡単にページを上下に切り替えることができます。Pixivのページが完全に読み込まれた後、すべての作品を自動的に展開します。
 // @description:en Quickly navigation between pages by scrolling the mouse wheel or pressing keys. Automatically expands all works after the Pixiv page is fully loaded.
 // @author       Max
-// @match        https://www.pixiv.net/*
-// @match        https://kemono.su/*
-// @match        https://kemono.party/*
-// @match        https://coomer.su/*
-// @match        https://coomer.party/*
+// @match        https://*/*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=pixiv.net
 // @grant    GM_registerMenuCommand
 // @grant        GM_setValue
@@ -24,134 +20,101 @@
 
 class PageInputNavigation {
     constructor() {
-        this.registerMenuCommand(this);
+        this.PageButtonsOfDomainCollector =new PageButtonsOfDomain();
+        this.Menu = new inputCustomMenu();
         this.pageButtons = this.getPageButtonsByDomain();
         this.buttonClicked = false;
-        this.loadPageKey();
         this.setEventListeners();
     }
 
-    async inputModeSwitch() {
-        //console.log("切換模式"+this.buttonClicked);
-        if (this.buttonClicked==true) {
-            window.removeEventListener("scroll", this.scrollHandler);
-            window.addEventListener("keypress", this.keyPressHandler);
-            console.log("切換為按鍵翻頁模式");
-            this.buttonClicked=false;
-        } else {
-            window.addEventListener("scroll", this.scrollHandler);
-            window.removeEventListener("keypress", this.keyPressHandler);
-            console.log("切換為滾輪翻頁模式");
-            this.buttonClicked=true;
+    getPageButtonsByDomain(){
+        const pageButtons=this.PageButtonsOfDomainCollector.getAllPageButtons();
+        const domain = self.location.hostname;
+        //onsole.log(pageButtons);
+       if(pageButtons[domain]!=null){
+        console.log(domain);
+        console.log(pageButtons[domain]);
+        return pageButtons[domain];
         }
+        console.log("general website");
+        console.log(pageButtons["general website"]);
+        return pageButtons["general website"];
     }
 
     async toNextPage() {
         const pageButtons = document.querySelectorAll(this.pageButtons.nextButton);
-        let nextPageButton;
-        if (pageButtons.length === 1) {
-            nextPageButton = pageButtons[0];
-        } else if (pageButtons.length >= 2) {
-            nextPageButton = pageButtons[1];
-        }
-        if (nextPageButton) {
+            let nextPageButton=pageButtons[pageButtons.length-1];
             nextPageButton.click();
         }
-    }
 
     async toPrevPage() {
         const prevPageButton = document.querySelectorAll(this.pageButtons.prevButton)[0];
-        if (prevPageButton) {
             prevPageButton.click();
-        }
     }
-    //使用網址頁面跳轉使整體頁面重新載入，其預設位置回歸頁面頂端而非如同按鈕跳至作品集頂端。
-    //然而即便按鈕對應的標籤改變，以網址進行跳轉仍然是可靠的，作為使用者的救急更換。
-    //         getPatternsByDomain() {
-    //     const pagePatterns = {
-    //       "www.pixiv.net": {
-    //         "artistHomePattern": /^https:\/\/www.pixiv.net\/users\/[0-9]*$/,
-    //         "artworksPattern": /^https:\/\/www.pixiv.net\/users\/[0-9]+\/artworks\?p=[0-9]+$/,
-    //         "artworkPattern": /^https:\/\/www.pixiv.net\/users\/[0-9]*\/artworks$/,
-    //       },
-    //     };
-    //     const domain = window.location.hostname;
-    //     //console.log(patterns[domain]);
-    //     return pagePatterns[domain];
-    //   }
-    //     toNextPage() {
-    //         const patterns = this.getPatternsByDomain();
-    //         if (patterns) {
-    //             const artworkPattern = patterns["artworkPattern"];
-    //             const artworksPattern = patterns["artworksPattern"];
-
-    //             if (artworkPattern && artworkPattern.test(window.location.href)) {
-    //                 let newURL=window.history.replaceState(null, null, window.location.href + "?p=1");
-    //                 window.location.href = newURL;
-    //             }
-    //             if (artworksPattern && artworksPattern.test(window.location.href)) {
-    //                 const currentPage = parseInt(window.location.href.match(/\?p=([0-9]+)/)[1]);
-    //                 const nextPage = currentPage + 1;
-    //                 const newURL = window.location.href.replace(/\?p=[0-9]+/, `?p=${nextPage}`);
-    //                 window.location.href = newURL;
-    //             }
-    //         }
-    //     }
-    //     toPrevPage() {
-    //         const patterns = this.getPatternsByDomain();
-    //         if (patterns) {
-    //             const artworkPattern = patterns["artworkPattern"];
-    //             const artworksPattern = patterns["artworksPattern"];
-
-    //             if (artworkPattern && artworkPattern.test(window.location.href)) {
-    //                 window.history.replaceState(null, null, window.location.href + "?p=1");
-    //                 window.location.reload(); // 重新載入頁面，使預設位置回歸頁面頂端
-    //             }
-
-    //             if (artworksPattern && artworksPattern.test(window.location.href)) {
-    //                 const currentPage = parseInt(window.location.href.match(/\?p=([0-9]+)/)[1]);
-    //                 const prevPage = currentPage - 1;
-    //                 const newURL = window.location.href.replace(/\?p=[0-9]+/, `?p=${prevPage}`);
-    //                 window.location.href = newURL;
-    //             }
-    //         }
-    //     }
 
     //此功能目前僅pivix需要
     expandAllWorks() {
         try {
-            const patterns = this.getPatternsByDomain();
-            const artistHomePattern = patterns.artistHomePattern;
-            if (artistHomePattern && artistHomePattern.test(window.location.href)) {
-                window.history.replaceState(null, null, window.location.href + "/artworks?p=1");
+            const artistHomePattern = /^https:\/\/www.pixiv.net\/users\/[0-9]*$/;
+            if (artistHomePattern && artistHomePattern.test(self.location.href)) {
+                self.history.replaceState(null, null, self.location.href + "/artworks?p=1");
             }
         } catch (e) {
         }
     }
 
+    setEventListeners() {
+        this.scrollHandler = () => this.handleScroll();
+        this.keyPressHandler = (event) => this.handleKeyPress(event);
+        self.addEventListener("keypress", this.keyPressHandler);
+        this.expandAllWorks();
+        //console.log("開始聆聽");
+    }
+
     handleScroll(scrollThreshold=3) {
-        const isBottom = document.documentElement.scrollHeight - window.innerHeight - window.pageYOffset <= this.scrollThreshold;
+        const isBottom = document.documentElement.scrollHeight - self.innerHeight - self.pageYOffset <= this.scrollThreshold;
         if (isBottom) {
             this.toNextPage();
             console.log("滾輪下一頁");
         }
-        if (window.pageYOffset <= 0) {
+        if (self.pageYOffset <= 0) {
             this.toPrevPage();
             console.log("滾輪上一頁");
         }
     }
 
     handleKeyPress(event) {
-        let prevPageUpper = this.pageKey[0].toUpperCase();
-        let nextPageUpper = this.pageKey[1].toUpperCase();
-        let prevPageLower = this.pageKey[0].toLowerCase();
-        let nextPageLower = this.pageKey[1].toLowerCase();
+        let prevPageUpper = this.Menu.pageKey[0].toUpperCase();
+        let nextPageUpper = this.Menu.pageKey[1].toUpperCase();
+        let prevPageLower = this.Menu.pageKey[0].toLowerCase();
+        let nextPageLower = this.Menu.pageKey[1].toLowerCase();
         if (event.key == prevPageUpper || event.key == prevPageLower) {
             this.toPrevPage();
             console.log("按鍵上一頁");
         } else if (event.key == nextPageUpper || event.key == nextPageLower) {
             this.toNextPage();
             console.log("按鍵下一頁");
+        }
+    }
+}
+
+class inputCustomMenu{
+    constructor() {
+        this.registerMenuCommand(this);
+        this.loadPageKey();
+    }
+      async inputModeSwitch() {
+        //console.log("切換模式"+this.buttonClicked);
+        if (this.buttonClicked==true) {
+            self.removeEventListener("scroll", this.scrollHandler);
+            self.addEventListener("keypress", this.keyPressHandler);
+            console.log("切換為按鍵翻頁模式");
+            this.buttonClicked=false;
+        } else {
+            self.addEventListener("scroll", this.scrollHandler);
+            self.removeEventListener("keypress", this.keyPressHandler);
+            console.log("切換為滾輪翻頁模式");
+            this.buttonClicked=true;
         }
     }
 
@@ -172,36 +135,9 @@ class PageInputNavigation {
     loadPageKey() {
         this.pageKey = GM_getValue("pageKey", ["Z", "X"]);
     }
+
     savePageKey() {
         GM_setValue("pageKey", this.pageKey);
-    }
-
-    setEventListeners() {
-        this.scrollHandler = () => this.handleScroll();
-        this.keyPressHandler = (event) => this.handleKeyPress(event);
-        window.addEventListener("keypress", this.keyPressHandler);
-        this.expandAllWorks();
-        //console.log("開始聆聽");
-    }
-
-    getPageButtonsByDomain(){
-        const pageButtons={
-            "www.pixiv.net" : {
-                "nextButton" : ".sc-d98f2c-0.sc-xhhh7v-2.cCkJiq.sc-xhhh7v-1-filterProps-Styled-Component.kKBslM",
-                "prevButton" : ".sc-d98f2c-0.sc-xhhh7v-2.cCkJiq.sc-xhhh7v-1-filterProps-Styled-Component.kKBslM",
-            },
-            "kemono.su" : {
-                "nextButton" : ".next",
-                "prevButton" : ".prev",
-            },
-            "coomer.su" : {
-                "nextButton" : ".next",
-                "prevButton" : ".prev",
-            },
-        };
-        const domain = window.location.hostname;
-        console.log(domain);
-        return pageButtons[domain];
     }
 
     getFeatureMessageLocalization(word) {
@@ -240,4 +176,158 @@ class PageInputNavigation {
     }
 }
 
+class PageButtonsOfDomain{
+  constructor(){
+   this.allPageButtons = GM_getValue("PageButtons",{
+          "www.pixiv.net": {
+            "nextButton": ".sc-d98f2c-0.sc-xhhh7v-2.cCkJiq.sc-xhhh7v-1-filterProps-Styled-Component.kKBslM",
+            "prevButton": ".sc-d98f2c-0.sc-xhhh7v-2.cCkJiq.sc-xhhh7v-1-filterProps-Styled-Component.kKBslM",
+          },
+          "exhentai.org": {
+            "nextButton": "#dnext",
+            "prevButton": "#dprev",
+          },
+          "e-hentai.org": {
+            "nextButton": "#dnext",
+            "prevButton": "#dprev",
+          },
+          "www.asmr.one": {
+            "nextButton": ".ant-pagination-item-link",
+            "prevButton": ".ant-pagination-item-link",
+          },
+          "www.goddessfantasy.net": {
+            "nextButton": ".navPages",
+            "prevButton": ".navPages",
+          },
+          "general website": {
+            "nextButton": ".next",
+            "prevButton": ".prev",
+          },
+        })
+      console.log(this.allPageButtons);
+  }
+
+    getAllPageButtons(){
+    return this.allPageButtons;
+  }
+ addPageButtons(domain, buttons) {
+    this.allPageButtons[domain] = buttons;
+    this.savePageButtonsToStorage(this.allPageButtons);
+  }
+
+  getPageButtons(domain) {
+    return this.pageButtonsOfDomain[domain];
+  }
+
+  savePageButtonsToStorage(pageButtons) {
+    GM_setValue('pageButtons', JSON.stringify(pageButtons));
+  }
+
+  getPageButtonsFromStorage() {
+    let storedPageButtons = GM_getValue('pageButtons');
+    return storedPageButtons ? JSON.parse(storedPageButtons) : {};
+  }
+
+  getFeatureMessageLocalization(word) {
+    let display = {
+      "zh-TW": {
+        "addNewDomainSupper": "新增支援網站",
+      },
+      "en": {
+        "addNewDomainSupper": "Add new supper domain",
+      },
+      "ja": {
+        "addNewDomainSupper": "サポートサイトを追加",
+      }
+    };
+    return display[navigator.language][word];
+  }
+}
+
+/* class addNewDomainSupper {
+  constructor() {
+    this.floatingWindow = this.createFloatingWindow();
+    this.setupListeners();
+    //this.registerMenuCommand(this);
+  }
+
+ registerMenuCommand(instance) {
+    GM_registerMenuCommand(instance.getFeatureMessageLocalization("addNewDomainSupper"), () => instance.createFloatingWindow())
+  }
+    getFeatureMessageLocalization(word) {
+    let display = {
+      "zh-TW": {
+        "addNewDomainSupper": "新增支援網站",
+      },
+      "en": {
+        "addNewDomainSupper": "Add new supper domain",
+      },
+      "ja": {
+        "addNewDomainSupper": "サポートサイトを追加",
+      }
+    };
+    return display[navigator.language][word];
+  }
+  createFloatingWindow() {
+    const floatingWindow = document.createElement('div');
+    floatingWindow.style.position = 'fixed';
+    floatingWindow.style.top = '50%';
+    floatingWindow.style.left = '50%';
+    floatingWindow.style.transform = 'translate(-50%, -50%)';
+    floatingWindow.style.background = '#fff';
+    floatingWindow.style.border = '1px solid #000';
+    floatingWindow.style.color = '000';
+    floatingWindow.style.padding = '20px';
+    document.body.appendChild(floatingWindow);
+    return floatingWindow;
+  }
+
+  setupListeners() {
+    this.floatingWindow.addEventListener('click', this.handleClick.bind(this));
+  }
+
+  handleClick(event) {
+    const target = event.target;
+    if (target.tagName === 'BUTTON') {
+      const action = target.textContent;
+      if (action === '確認') {
+        this.confirm();
+      } else if (action === '取消') {
+        this.cancel();
+      }
+    }
+  }
+
+  confirm() {
+    const prevInput = this.floatingWindow.querySelector('.prev-input');
+    const nextInput = this.floatingWindow.querySelector('.next-input');
+    const selectOption = this.floatingWindow.querySelector('.select-option');
+    const selectedOption = selectOption.value;
+    const prevValue = prevInput.value;
+    const nextValue = nextInput.value;
+    const domain = window.location.hostname;
+
+    let buttons = {};
+    if (selectedOption === 'class') {
+      buttons = {
+        prevButton: `.${prevValue}`,
+        nextButton: `.${nextValue}`
+      };
+    } else if (selectedOption === 'id') {
+      buttons = {
+        prevButton: `#${prevValue}`,
+        nextButton: `#${nextValue}`
+      };
+    }
+
+    PageButtonsOfDomain.addPageButtons(domain, buttons);
+    this.floatingWindow.remove();
+  }
+
+  cancel() {
+    this.floatingWindow.remove();
+  }
+} */
+
+const transferStudent = new addNewDomainSupper();
 const johnTheAlmondHolder = new PageInputNavigation();
