@@ -10,6 +10,7 @@
 // @description:ja マウスホイールをスクロールするか、キーを押すことで、簡単にページを上下に切り替えることができます。Pixivのページが完全に読み込まれた後、すべての作品を自動的に展開します。
 // @description:en Quickly navigation between pages by scrolling the mouse wheel or pressing keys. Automatically expands all works after the Pixiv page is fully loaded.
 // @author       Max
+// @match        https://www.pixiv.net/*
 // @match        https://*/*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=pixiv.net
 // @grant    GM_registerMenuCommand
